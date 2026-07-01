@@ -6,14 +6,10 @@
       version = "~> 3.0"
     }
   }
-  backend "local" {
-    path = "terraform.tfstate"
-  }
+  backend "local" { path = "terraform.tfstate" }
 }
 
-provider "azurerm" {
-  features {}
-}
+provider "azurerm" { features {} }
 
 locals {
   common_tags = {
@@ -24,21 +20,19 @@ locals {
 }
 
 resource "azurerm_resource_group" "connectivity" {
-  name     = "rg-\-connectivity"
+  name     = "rg-${var.environment}-connectivity"
   location = var.location
   tags     = local.common_tags
 }
 
-# Hub VNet
 resource "azurerm_virtual_network" "hub" {
-  name                = "vnet-hub-\"
+  name                = "vnet-hub-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.connectivity.name
   address_space       = var.address_space
   tags                = local.common_tags
 }
 
-# Azure Firewall Subnet
 resource "azurerm_subnet" "firewall" {
   name                 = "AzureFirewallSubnet"
   resource_group_name  = azurerm_resource_group.connectivity.name
@@ -46,7 +40,6 @@ resource "azurerm_subnet" "firewall" {
   address_prefixes     = ["10.0.0.0/26"]
 }
 
-# Gateway Subnet
 resource "azurerm_subnet" "gateway" {
   name                 = "GatewaySubnet"
   resource_group_name  = azurerm_resource_group.connectivity.name
@@ -54,7 +47,6 @@ resource "azurerm_subnet" "gateway" {
   address_prefixes     = ["10.0.1.0/27"]
 }
 
-# Bastion Subnet
 resource "azurerm_subnet" "bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = azurerm_resource_group.connectivity.name
@@ -62,9 +54,8 @@ resource "azurerm_subnet" "bastion" {
   address_prefixes     = ["10.0.2.0/27"]
 }
 
-# Azure Firewall Public IP
 resource "azurerm_public_ip" "firewall" {
-  name                = "pip-firewall-\"
+  name                = "pip-firewall-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.connectivity.name
   allocation_method   = "Static"
@@ -72,9 +63,8 @@ resource "azurerm_public_ip" "firewall" {
   tags                = local.common_tags
 }
 
-# Azure Firewall
 resource "azurerm_firewall" "main" {
-  name                = "afw-\"
+  name                = "afw-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.connectivity.name
   sku_name            = "AZFW_VNet"
@@ -88,9 +78,8 @@ resource "azurerm_firewall" "main" {
   }
 }
 
-# Azure Bastion Public IP
 resource "azurerm_public_ip" "bastion" {
-  name                = "pip-bastion-\"
+  name                = "pip-bastion-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.connectivity.name
   allocation_method   = "Static"
@@ -98,9 +87,8 @@ resource "azurerm_public_ip" "bastion" {
   tags                = local.common_tags
 }
 
-# Azure Bastion
 resource "azurerm_bastion_host" "main" {
-  name                = "bas-\"
+  name                = "bas-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.connectivity.name
   tags                = local.common_tags

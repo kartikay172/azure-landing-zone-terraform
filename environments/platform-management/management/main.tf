@@ -20,14 +20,13 @@ locals {
 }
 
 resource "azurerm_resource_group" "management" {
-  name     = "rg-\-management"
+  name     = "rg-${var.environment}-management"
   location = var.location
   tags     = local.common_tags
 }
 
-# Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "main" {
-  name                = "law-\"
+  name                = "law-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.management.name
   sku                 = "PerGB2018"
@@ -35,18 +34,16 @@ resource "azurerm_log_analytics_workspace" "main" {
   tags                = local.common_tags
 }
 
-# Automation Account
 resource "azurerm_automation_account" "main" {
-  name                = "aa-\"
+  name                = "aa-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.management.name
   sku_name            = "Basic"
   tags                = local.common_tags
 }
 
-# Key Vault
 resource "azurerm_key_vault" "main" {
-  name                = "kv-\-mgmt"
+  name                = "kv-${var.environment}-mgmt"
   location            = var.location
   resource_group_name = azurerm_resource_group.management.name
   tenant_id           = var.tenant_id
@@ -54,9 +51,8 @@ resource "azurerm_key_vault" "main" {
   tags                = local.common_tags
 }
 
-# Recovery Services Vault
 resource "azurerm_recovery_services_vault" "main" {
-  name                = "rsv-\"
+  name                = "rsv-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.management.name
   sku                 = "Standard"

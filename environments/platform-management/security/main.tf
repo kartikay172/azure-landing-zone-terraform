@@ -20,20 +20,18 @@ locals {
 }
 
 resource "azurerm_resource_group" "security" {
-  name     = "rg-\-security"
+  name     = "rg-${var.environment}-security"
   location = var.location
   tags     = local.common_tags
 }
 
-# Microsoft Defender for Cloud
 resource "azurerm_security_center_subscription_pricing" "defender" {
   tier          = "Standard"
   resource_type = "VirtualMachines"
 }
 
-# Microsoft Sentinel (Log Analytics Workspace)
 resource "azurerm_log_analytics_workspace" "sentinel" {
-  name                = "law-sentinel-\"
+  name                = "law-sentinel-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.security.name
   sku                 = "PerGB2018"

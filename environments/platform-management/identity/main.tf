@@ -6,21 +6,10 @@
       version = "~> 3.0"
     }
   }
-  backend "local" {
-    path = "terraform.tfstate"
-  }
+  backend "local" { path = "terraform.tfstate" }
 }
 
-provider "azurerm" {
-  features {}
-}
-
-# Resource Group
-resource "azurerm_resource_group" "identity" {
-  name     = "rg-\-identity"
-  location = var.location
-  tags     = local.common_tags
-}
+provider "azurerm" { features {} }
 
 locals {
   common_tags = {
@@ -30,10 +19,14 @@ locals {
   }
 }
 
-# Microsoft Entra ID / Azure AD - handled via Azure AD provider
-# Privileged Identity Management
+resource "azurerm_resource_group" "identity" {
+  name     = "rg-${var.environment}-identity"
+  location = var.location
+  tags     = local.common_tags
+}
+
 resource "azurerm_role_assignment" "pim_reader" {
-  scope                = "/subscriptions/\"
+  scope                = "/subscriptions/${var.subscription_id}"
   role_definition_name = "Reader"
   principal_id         = var.admin_principal_id
 }
