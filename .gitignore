@@ -14,3 +14,8 @@ override.tf.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Installers
+*.msi
+*.exe
+*.pkg
