@@ -6,10 +6,14 @@ terraform {
       version = "~> 3.0"
     }
   }
-  backend "local" { path = "terraform.tfstate" }
+  backend "local" {
+    path = "terraform.tfstate"
+  }
 }
 
-provider "azurerm" { features {} }
+provider "azurerm" {
+  features {}
+}
 
 locals {
   common_tags = {
