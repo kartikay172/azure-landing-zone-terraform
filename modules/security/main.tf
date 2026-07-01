@@ -19,7 +19,12 @@ resource "azurerm_security_center_subscription_pricing" "defender_keyvault" {
   resource_type = "KeyVaults"
 }
 
-# Microsoft Sentinel - Log Analytics Workspace
+resource "azurerm_security_center_subscription_pricing" "defender_containers" {
+  tier          = "Standard"
+  resource_type = "Containers"
+}
+
+# Microsoft Sentinel
 resource "azurerm_log_analytics_workspace" "sentinel" {
   name                = "law-sentinel-${var.environment}"
   location            = var.location
@@ -29,7 +34,6 @@ resource "azurerm_log_analytics_workspace" "sentinel" {
   tags                = var.common_tags
 }
 
-# Enable Microsoft Sentinel
 resource "azurerm_sentinel_log_analytics_workspace_onboarding" "main" {
   workspace_id = azurerm_log_analytics_workspace.sentinel.id
 }
@@ -46,7 +50,6 @@ resource "azurerm_firewall_policy" "main" {
   }
 }
 
-# Firewall Policy Rule Collection Group
 resource "azurerm_firewall_policy_rule_collection_group" "main" {
   name               = "DefaultRules"
   firewall_policy_id = azurerm_firewall_policy.main.id
@@ -64,5 +67,26 @@ resource "azurerm_firewall_policy_rule_collection_group" "main" {
       destination_addresses = ["*"]
       destination_ports     = ["53"]
     }
+  }
+}
+
+# DDoS Protection Plan
+resource "azurerm_network_ddos_protection_plan" "main" {
+  name                = "ddos-security-${var.environment}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.common_tags
+}
+
+# Microsoft Purview Account (If Required)
+resource "azurerm_purview_account" "main" {
+  count               = var.enable_purview ? 1 : 0
+  name                = "purview-${var.environment}"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.common_tags
+
+  identity {
+    type = "SystemAssigned"
   }
 }

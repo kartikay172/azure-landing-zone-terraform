@@ -25,11 +25,40 @@ resource "azurerm_automation_account" "main" {
   tags                = var.common_tags
 }
 
-# Link Automation Account to Log Analytics (Update Manager)
+# Link Automation to Log Analytics
 resource "azurerm_log_analytics_linked_service" "automation" {
   resource_group_name = var.resource_group_name
   workspace_id        = azurerm_log_analytics_workspace.main.id
   read_access_id      = azurerm_automation_account.main.id
+}
+
+# Update Manager - Maintenance Configuration
+resource "azurerm_maintenance_configuration" "update_manager" {
+  name                     = "mc-updates-${var.environment}"
+  resource_group_name      = var.resource_group_name
+  location                 = var.location
+  scope                    = "InGuestPatch"
+  in_guest_user_patch_mode = "User"
+  tags                     = var.common_tags
+
+  window {
+    start_date_time = "2026-07-01 02:00"
+    duration        = "02:00"
+    time_zone       = "India Standard Time"
+    recur_every     = "1Week"
+  }
+
+  install_patches {
+    reboot = "IfRequired"
+
+    windows {
+      classifications_to_include = ["Critical", "Security", "UpdateRollup"]
+    }
+
+    linux {
+      classifications_to_include = ["Critical", "Security"]
+    }
+  }
 }
 
 # Recovery Services Vault
@@ -44,14 +73,14 @@ resource "azurerm_recovery_services_vault" "main" {
 
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                        = "kv-${var.environment}-mgmt"
-  location                    = var.location
-  resource_group_name         = var.resource_group_name
-  tenant_id                   = var.tenant_id
-  sku_name                    = "standard"
-  purge_protection_enabled    = false
-  soft_delete_retention_days  = 7
-  tags                        = var.common_tags
+  name                       = "kv-${var.environment}-mgmt"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  tenant_id                  = var.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = false
+  soft_delete_retention_days = 7
+  tags                       = var.common_tags
 }
 
 # Storage Account (Diagnostics)
@@ -64,7 +93,7 @@ resource "azurerm_storage_account" "diagnostics" {
   tags                     = var.common_tags
 }
 
-# Diagnostic Settings - Send to Log Analytics
+# Diagnostic Settings
 resource "azurerm_monitor_diagnostic_setting" "main" {
   name                       = "diag-${var.environment}"
   target_resource_id         = azurerm_key_vault.main.id

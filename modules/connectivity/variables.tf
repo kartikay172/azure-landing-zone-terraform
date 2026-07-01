@@ -19,6 +19,18 @@ variable "address_space" {
   default     = ["10.0.0.0/16"]
 }
 
+variable "enable_expressroute" {
+  type        = bool
+  description = "Enable ExpressRoute Gateway (If Required)"
+  default     = false
+}
+
+variable "enable_route_server" {
+  type        = bool
+  description = "Enable Route Server (If Required)"
+  default     = false
+}
+
 variable "common_tags" {
   type        = map(string)
   description = "Common tags"
