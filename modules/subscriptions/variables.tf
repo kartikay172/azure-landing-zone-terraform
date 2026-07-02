@@ -3,6 +3,11 @@ variable "subscription_name" {
   description = "Subscription display name"
 }
 
+variable "subscription_id" {
+  type        = string
+  description = "Azure Subscription ID"
+}
+
 variable "management_group_id" {
   type        = string
   description = "Parent management group ID"
